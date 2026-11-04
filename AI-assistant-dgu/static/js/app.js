@@ -82,15 +82,6 @@ async function sendQuestion() {
 }
 
 sendButton?.addEventListener("click", sendQuestion);
-if (form && button) {
-  form.addEventListener("submit", function () {
-      if (button.disabled) {
-        return;
-      }
-      button.disabled = true;
-      button.textContent = "Отправка...";
-    });
-}
 
 chatInput?.addEventListener("keydown", event => {
   if (event.key === "Enter" && !event.shiftKey) {
