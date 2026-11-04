@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}ДГУ Колледж — цифровой помощник{% endblock %}</title>
+<link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='img/college-logo.jpeg') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+   {% if session.get('staff_id') %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+   {% endif %}
+</head>
+<body class="{% if session.get('staff_id') %}admin-body{% endif %}">
+{% if session.get('staff_id') %}
+<div class="admin-shell">
+<aside class="admin-sidebar">
+<a class="admin-brand" href="{{ url_for('admin') }}">
+<img class="admin-brand-logo" src="{{ url_for('static', filename='img/college-logo.jpeg') }}" alt="Эмблема колледжа ДГУ">
+<span>
+<b>ДГУ | КОЛЛЕДЖ</b>
+<small>Цифровые сервисы</small>
+</span>
+</a>
+<div class="sidebar-caption">РАБОЧЕЕ ПРОСТРАНСТВО</div>
+<nav class="sidebar-nav">
+<a href="{{ url_for('admin') }}">▦ Главная</a>
+<a href="{{ url_for('admin_tickets') }}">▤ Все обращения</a>
+<a href="{{ url_for('admin_tickets', status='Новая') }}">◷ Новые обращения</a>
+<a href="{{ url_for('admin_tickets', status='В работе') }}">◉ В работе</a>
+<a href="{{ url_for('stats') }}">▥ Статистика</a>
+</nav>
+<div class="sidebar-caption sidebar-caption-spaced">ИНСТРУМЕНТЫ</div>
+<nav class="sidebar-nav">
+<a href="{{ url_for('admin_locations') }}">▦ Помещения и QR-коды</a>
+<a href="{{ url_for('admin_knowledge') }}">◇ База знаний ИИ</a>
+</nav>
+<div class="sidebar-bottom">
+<div class="staff-mini">
+<span class="staff-avatar">{{ (session.get('staff_name') or 'С')[0]|upper }}</span>
+<span>
+<b>{{ session.get('staff_name') }}</b>
+<small>Сотрудник УПК</small>
+</span>
+</div>
+<form method="post" action="{{ url_for('logout') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<button class="sidebar-logout" type="submit">
+                   ↪ Выйти из системы
+</button>
+</form>
+</div>
+</aside>
+<main class="admin-main">
+<header class="admin-topbar">
+<div>
+<span class="topbar-kicker">ДГУ КОЛЛЕДЖ / УПК</span>
+<b>{% block section_name %}Панель управления{% endblock %}</b>
+</div>
+<div class="topbar-user">
+<span class="online-dot"></span>
+<span>{{ session.get('staff_name') }}</span>
+<span class="topbar-avatar">
+                   {{ (session.get('staff_name') or 'С')[0]|upper }}
+</span>
+</div>
+</header>
+<div class="admin-content">
+{% else %}
+<header class="topbar">
+<a class="brand" href="{{ url_for('index') }}">
+<img class="brand-logo" src="{{ url_for('static', filename='img/college-logo.jpeg') }}" alt="Эмблема колледжа ДГУ">
+<span>
+           ДГУ Колледж
+<small>Цифровой помощник</small>
+</span>
+</a>
+<nav>
+<a href="{{ url_for('login') }}">Для сотрудников</a>
+</nav>
+</header>
+<main class="container">
+{% endif %}
+   {% with messages = get_flashed_messages(with_categories=true) %}
+       {% if messages %}
+           {% for category, message in messages %}
+<div class="flash {{ category }}">{{ message }}</div>
+           {% endfor %}
+       {% endif %}
+   {% endwith %}
+   {% block content %}{% endblock %}
+{% if session.get('staff_id') %}
+</div>
+<footer class="admin-footer">
+           ДГУ Колледж · Система регистрации и обработки обращений
+</footer>
+</main>
+</div>
+{% else %}
+</main>
+<footer>
+   ДГУ Колледж · Система регистрации обращений
+</footer>
+{% endif %}
+</body>
+</html>

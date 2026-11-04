@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Главная панель — ДГУ Колледж{% endblock %}
+{% block section_name %}Главная панель{% endblock %}
+{% block content %}
+<section class="admin-page-heading">
+  <div><div class="eyebrow">ЦЕНТР УПРАВЛЕНИЯ ОБРАЩЕНИЯМИ</div><h1>Добро пожаловать, {{ session.get('staff_name') }}!</h1><p>Здесь собрана актуальная информация о состоянии обращений колледжа.</p></div>
+  <a class="admin-primary-button" href="{{ url_for('admin_tickets') }}">Открыть обращения <span>→</span></a>
+</section>
+<section class="admin-stat-grid">
+  <article class="admin-stat-card"><div class="admin-stat-top"><span>Всего обращений</span><span class="stat-icon blue">▤</span></div><strong>{{ counts.all }}</strong><small>За всё время</small></article>
+  <article class="admin-stat-card"><div class="admin-stat-top"><span>Новые</span><span class="stat-icon amber">◷</span></div><strong>{{ counts.new }}</strong><small>Ожидают рассмотрения</small></article>
+  <article class="admin-stat-card"><div class="admin-stat-top"><span>Открытые</span><span class="stat-icon violet">◉</span></div><strong>{{ counts.open }}</strong><small>Требуют обработки</small></article>
+  <article class="admin-stat-card"><div class="admin-stat-top"><span>Решённые</span><span class="stat-icon green">✓</span></div><strong>{{ counts.done }}</strong><small>Работа завершена</small></article>
+</section>
+<div class="dashboard-grid">
+<!-- Последние обращения -->
+<section class="admin-panel recent-panel">
+<div class="admin-panel-heading">
+<div>
+<h2>Последние обращения</h2>
+<p>Недавно поступившие сообщения пользователей</p>
+</div>
+<a href="{{ url_for('admin_tickets') }}">Все обращения →</a>
+</div>
+   {% if recent_tickets %}
+<div class="recent-list">
+     {% for t in recent_tickets %}
+<a class="recent-ticket" href="{{ url_for('admin_ticket', ticket_id=t.id) }}">
+<span class="ticket-type-icon">▤</span>
+<span class="recent-ticket-main">
+<b>{{ t.title }}</b>
+<small>{{ t.public_number }} · {{ ((t.applicant_name or '') ~ ' ' ~ (t.applicant_surname or ''))|trim or 'Заявитель не указан' }} · {{ t.zone_name or 'Место не указано' }} · {{ t.created_at }}</small>
+</span>
+<span class="status-pill status-{{ loop.index % 5 }}">{{ t.status }}</span>
+<span class="recent-arrow">›</span>
+</a>
+     {% endfor %}
+</div>
+   {% else %}
+<div class="admin-empty">
+<span>▤</span>
+<b>Обращений пока нет</b>
+<p>Когда пользователь отправит первое обращение, оно появится здесь.</p>
+</div>
+   {% endif %}
+</section>
+<!-- Категории обращений -->
+<section class="admin-panel category-panel">
+<div class="admin-panel-heading">
+<div>
+<h2>Категории обращений</h2>
+<p>Распределение по типам проблем</p>
+</div>
+</div>
+   {% if category_stats %}
+     {% set max_category = category_stats[0].total %}
+     {% for item in category_stats %}
+       {% set width = (item.total / max_category * 100)|round|int %}
+<div class="category-row">
+<div>
+<span>{{ item.category }}</span>
+<b>{{ item.total }}</b>
+</div>
+<div class="category-track">
+<i style="--bar-width: {{ width }}%"></i>
+</div>
+</div>
+     {% endfor %}
+   {% else %}
+<div class="admin-empty compact">
+<p>Статистика появится после регистрации обращений.</p>
+</div>
+   {% endif %}
+</section>
+
+<section class="admin-panel quick-panel" id="quick-access">
+  <div class="admin-panel-heading"><div><h2>Быстрый доступ</h2><p>Инструменты сотрудника УПК</p></div></div>
+  <div class="quick-grid">
+    <a href="{{ url_for('admin_tickets', status='Новая') }}"><span class="quick-icon amber">◷</span><b>Новые обращения</b><small>Проверить поступившие заявки</small></a>
+    <a href="{{ url_for('stats') }}"><span class="quick-icon blue">▥</span><b>Статистика</b><small>Посмотреть показатели системы</small></a>
+    <a href="{{ url_for('admin_tickets') }}"><span class="quick-icon green">▤</span><b>Все обращения</b><small>Поиск и фильтрация заявок</small></a>
+    <a href="{{ url_for('admin') }}#qr-codes"><span class="quick-icon violet">▦</span><b>QR-коды помещений</b><small>{{ locations_count }} помещений в справочнике</small></a>
+  </div>
+</section>
+<section class="admin-panel qr-admin-panel" id="qr-codes">
+  <div class="admin-panel-heading">
+    <div><h2>QR-коды помещений</h2><p>Каждый код открывает форму обращения с автоматически выбранным местом.</p></div>
+    <a class="admin-primary-button" href="{{ url_for('admin_locations') }}">Управлять помещениями</a>
+  </div>
+  {% if locations %}
+  <div class="admin-qr-grid">
+    {% for location in locations %}
+    <div class="admin-qr-item">
+      <img src="{{ url_for('qr_image', qr_key=location.qr_key) }}?v={{ qr_version }}" alt="QR-код: {{ location.zone_name }}">
+      <div>
+        <b>{{ location.zone_name or ('Кабинет ' ~ location.room) }}</b>
+        <small>{{ location.building }}{% if location.floor %}, этаж {{ location.floor }}{% endif %}{% if location.room %}, каб. {{ location.room }}{% endif %}</small>
+        <a href="{{ url_for('qr_image', qr_key=location.qr_key) }}" download="qr-{{ location.qr_key }}.png">Скачать QR-код</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}<div class="admin-empty compact"><p>Помещения ещё не добавлены.</p></div>{% endif %}
+  <div class="knowledge-notice"><span>◇</span><div><b>База знаний ИИ</b><p>Управляйте проверенными вопросами и ответами, которые использует ИИ-помощник.</p><a href="{{ url_for('admin_knowledge') }}">Открыть базу знаний →</a></div></div>
+</section>
+{% endblock %}

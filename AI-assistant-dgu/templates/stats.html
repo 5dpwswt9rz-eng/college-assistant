@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Статистика — ДГУ Колледж{% endblock %}
+{% block section_name %}Статистика{% endblock %}
+{% block content %}
+<section class="admin-page-heading"><div><div class="eyebrow">АНАЛИТИКА</div><h1>Статистика обращений</h1><p>Сводные показатели по зарегистрированным заявкам.</p></div></section>
+<div class="dashboard-grid">
+<section class="admin-panel"><h2>По категориям</h2>{% for x in by_category %}<div class="bar-row"><span>{{ x.category }}</span><b>{{ x.total }}</b><div class="bar"><i style="width:{{ (x.total / (by_category[0].total or 1) * 100)|round }}%"></i></div></div>{% else %}<p class="muted">Данных пока нет.</p>{% endfor %}</section>
+<section class="admin-panel"><h2>По статусам</h2>{% for x in by_status %}<div class="bar-row"><span>{{ x.status }}</span><b>{{ x.total }}</b><div class="bar"><i style="width:{{ (x.total / (by_status[0].total or 1) * 100)|round }}%"></i></div></div>{% else %}<p class="muted">Данных пока нет.</p>{% endfor %}</section>
+</div>
+<section class="admin-panel lower"><h2>По помещениям</h2>{% for x in by_location %}<div class="bar-row"><span>{{ x.location }}</span><b>{{ x.total }}</b></div>{% else %}<p class="muted">Данных пока нет.</p>{% endfor %}</section>
+{% endblock %}

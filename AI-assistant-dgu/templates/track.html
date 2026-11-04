@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Отслеживание {{ ticket.public_number }}{% endblock %}
+{% block content %}
+<div class="page-head"><span class="eyebrow">ОТСЛЕЖИВАНИЕ</span><h1>{{ ticket.public_number }}</h1><p>Информация о вашей заявке</p></div>
+<section class="panel">
+  <div class="detail-top"><span class="status">{{ ticket.status }}</span><span class="muted">Создана: {{ ticket.created_at }}</span></div>
+  <h2>{{ ticket.title }}</h2><p>{{ ticket.description }}</p>
+  <div class="meta-grid">
+    <div><small>Категория</small><b>{{ ticket.category }}</b></div>
+    <div><small>Место</small><b>{% if location %}{{ location.building }}, {{ location.zone_name }}{% else %}Не указано{% endif %}</b></div>
+    <div><small>Исполнитель</small><b>{{ ticket.assignee or "Пока не назначен" }}</b></div>
+  </div>
+  {% if ticket.image_name %}<p><a href="{{ url_for('tracked_ticket_photo', token=token) }}">Открыть прикреплённое фото</a></p>{% endif %}
+</section>
+<div class="two-col lower">
+  <section class="panel"><h2>История статусов</h2>
+    {% for item in history %}<div class="timeline-item"><b>{{ item.new_status }}</b><small>{{ item.created_at }}</small>{% if item.note %}<p>{{ item.note }}</p>{% endif %}</div>{% else %}<p class="muted">История пока пуста.</p>{% endfor %}
+  </section>
+  <section class="panel"><h2>Комментарии</h2>
+    {% for item in comments %}<div class="comment"><p>{{ item.body }}</p><small>{{ item.created_at }}</small></div>{% else %}<p class="muted">Публичных комментариев пока нет.</p>{% endfor %}
+  </section>
+</div>
+{% endblock %}

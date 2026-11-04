@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Обращения — ДГУ Колледж{% endblock %}
+{% block section_name %}Обращения{% endblock %}
+{% block content %}
+<section class="admin-page-heading"><div><div class="eyebrow">УПРАВЛЕНИЕ ОБРАЩЕНИЯМИ</div><h1>Все обращения</h1><p>Поиск, фильтрация и обработка сообщений пользователей.</p></div><div class="heading-counter"><b>{{ tickets|length }}</b><span>найдено</span></div></section>
+<div class="mini-stat-row"><div><span>Всего</span><b>{{ counts.all }}</b></div><div><span>Новые</span><b>{{ counts.new }}</b></div><div><span>Открытые</span><b>{{ counts.open }}</b></div><div><span>Решённые</span><b>{{ counts.done }}</b></div></div>
+<section class="admin-panel filters-panel">
+  <form method="get" class="admin-filters">
+    <label class="search-field"><span>⌕</span><input name="q" value="{{ q }}" placeholder="Номер, описание или исполнитель"></label>
+    <select name="status"><option value="">Все статусы</option>{% for s in statuses %}<option value="{{ s }}" {% if selected_status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+    <select name="category"><option value="">Все категории</option>{% for c in categories %}<option value="{{ c }}" {% if selected_category==c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select>
+    <select name="location"><option value="">Все помещения</option>{% for loc in locations %}<option value="{{ loc.id }}" {% if selected_location|string==loc.id|string %}selected{% endif %}>{{ loc.zone_name or loc.room or loc.building }}</option>{% endfor %}</select>
+    <input type="date" name="date_from" value="{{ date_from }}" aria-label="Дата с">
+    <input type="date" name="date_to" value="{{ date_to }}" aria-label="Дата по">
+    <button class="admin-primary-button" type="submit">Применить</button>
+    <a class="admin-reset" href="{{ url_for('admin_tickets') }}">Сбросить</a>
+  </form>
+</section>
+<section class="admin-panel admin-table-panel">
+  <div class="admin-panel-heading"><div><h2>Реестр обращений</h2><p>Нажмите на обращение, чтобы открыть подробности и ответить заявителю.</p></div></div>
+  {% if tickets %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Номер / дата</th><th>Заявитель / обращение</th><th>Категория</th><th>Место</th><th>Исполнитель</th><th>Статус</th><th></th></tr></thead><tbody>
+  {% for t in tickets %}<tr><td><b class="ticket-number">{{ t.public_number }}</b><small>{{ t.created_at }}</small></td><td><b>{{ ((t.applicant_name or '') ~ ' ' ~ (t.applicant_surname or ''))|trim or 'Заявитель не указан' }}</b><small>{{ t.title }} · {{ t.description[:75] }}{% if t.description|length > 95 %}…{% endif %}</small></td><td>{{ t.category }}</td><td>{{ t.zone_name or 'Не указано' }}</td><td>{{ t.assignee or 'Не назначен' }}</td><td><span class="status-label">{{ t.status }}</span></td><td><a class="table-open" href="{{ url_for('admin_ticket', ticket_id=t.id) }}">Открыть →</a></td></tr>{% endfor %}
+  </tbody></table></div>{% else %}<div class="admin-empty"><span>⌕</span><b>Обращения не найдены</b><p>Измените параметры фильтрации или очистите поиск.</p><a class="admin-reset" href="{{ url_for('admin_tickets') }}">Сбросить фильтры</a></div>{% endif %}
+</section>
+{% endblock %}

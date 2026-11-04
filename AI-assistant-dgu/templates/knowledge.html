@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}База знаний ИИ — ДГУ Колледж{% endblock %}
+{% block section_name %}База знаний ИИ{% endblock %}
+{% block content %}
+<section class="admin-page-heading">
+  <div>
+    <div class="eyebrow">УПРАВЛЕНИЕ ЗНАНИЯМИ</div>
+    <h1>База знаний ИИ</h1>
+    <p>Добавляйте проверенные инструкции, по которым помощник отвечает студентам.</p>
+  </div>
+  <div class="heading-counter"><b>{{ knowledge_items|length }}</b><span>инструкций</span></div>
+</section>
+<section class="admin-panel knowledge-form-panel">
+  <div class="admin-panel-heading"><div><h2>Добавить инструкцию</h2><p>Вопрос, достоверный ответ и слова, по которым ИИ сможет найти инструкцию.</p></div></div>
+  <form method="post" class="knowledge-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Вопрос<input name="question" maxlength="250" required placeholder="Например: Как подключить проектор?"></label>
+    <label>Ключевые слова<textarea name="keywords" rows="2" required placeholder="проектор, подключить ноутбук, HDMI"></textarea><small>Разделяйте слова запятыми или переносом строки.</small></label>
+    <label>Проверенный ответ<textarea name="answer" rows="5" maxlength="10000" required placeholder="Введите инструкцию, на основе которой помощник будет отвечать."></textarea></label>
+    <button class="admin-primary-button" type="submit">Добавить в базу знаний</button>
+  </form>
+</section>
+<section class="knowledge-list">
+  <div class="admin-panel-heading"><div><h2>Сохранённые инструкции</h2><p>Изменения применяются к новым вопросам сразу после сохранения.</p></div></div>
+  {% for item in knowledge_items %}
+  <article class="admin-panel knowledge-item {% if not item.is_active %}knowledge-disabled{% endif %}">
+    <form method="post" action="{{ url_for('edit_knowledge', item_id=item.id) }}" class="knowledge-edit-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="knowledge-item-top"><span class="knowledge-id">ИНСТРУКЦИЯ №{{ item.id }}</span><label class="knowledge-active"><input type="checkbox" name="is_active" value="1" {% if item.is_active %}checked{% endif %}> Использовать в ответах ИИ</label></div>
+      <label>Вопрос<input name="question" maxlength="250" required value="{{ item.question }}"></label>
+      <label>Ключевые слова<textarea name="keywords" rows="2" required>{{ item.keywords_list|join(', ') }}</textarea></label>
+      <label>Ответ<textarea name="answer" rows="4" maxlength="10000" required>{{ item.answer }}</textarea></label>
+      <div class="knowledge-actions"><button class="admin-primary-button" type="submit">Сохранить изменения</button></div>
+    </form>
+    <form method="post" action="{{ url_for('delete_knowledge', item_id=item.id) }}" onsubmit="return confirm('Удалить эту инструкцию?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="knowledge-delete" type="submit">Удалить инструкцию</button>
+    </form>
+  </article>
+  {% else %}
+  <div class="admin-panel admin-empty"><b>База знаний пока пуста</b><p>Добавьте первую проверенную инструкцию с помощью формы выше.</p></div>
+  {% endfor %}
+</section>
+{% endblock %}

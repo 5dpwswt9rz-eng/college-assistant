@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Панель УПК{% endblock %}
+{% block content %}
+<div class="page-head"><span class="eyebrow">УПРАВЛЕНИЕ ОБРАЩЕНИЯМИ</span><h1>Панель УПК</h1><p>Здравствуйте, {{ session.get('staff_name') }}.</p></div>
+<div class="stats-row">
+  <div class="stat-card"><small>Всего заявок</small><strong>{{ counts.all }}</strong></div>
+  <div class="stat-card"><small>Открытые</small><strong>{{ counts.open }}</strong></div>
+  <div class="stat-card"><small>Решённые</small><strong>{{ counts.done }}</strong></div>
+</div>
+<form class="filters" method="get">
+  <input name="q" value="{{ q }}" placeholder="Поиск по номеру или тексту">
+  <select name="status"><option value="">Все статусы</option>{% for s in statuses %}<option {% if selected_status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+  <select name="category"><option value="">Все категории</option>{% for c in categories %}<option {% if selected_category==c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select>
+  <button class="button secondary">Найти</button>
+</form>
+<section class="panel table-panel">
+  <div class="table-title"><h2>Обращения</h2><span class="muted">{{ tickets|length }} записей</span></div>
+  {% if tickets %}
+  <div class="table-wrap"><table><thead><tr><th>Номер</th><th>Описание</th><th>Категория</th><th>Место</th><th>Статус</th><th>Дата</th><th></th></tr></thead><tbody>
+  {% for t in tickets %}<tr>
+    <td><b>{{ t.public_number }}</b></td><td>{{ t.title }}</td><td>{{ t.category }}</td>
+    <td>{{ t.zone_name or "Не указано" }}</td><td><span class="status">{{ t.status }}</span></td>
+    <td>{{ t.created_at }}</td><td><a class="text-link" href="{{ url_for('admin_ticket', ticket_id=t.id) }}">Открыть →</a></td>
+  </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty"><span>⌕</span><h3>Заявок не найдено</h3><p>Измените фильтры или дождитесь новых обращений.</p></div>{% endif %}
+</section>
+<section class="panel qr-panel"><div><h2>Демонстрационные QR-коды</h2><p class="muted">Распечатайте или покажите QR-код для быстрого открытия формы с привязанным помещением.</p></div>
+<div class="qr-grid">
+  {% for key, label in [
+       ('cabinet-214', 'Кабинет 214'),
+       ('cabinet-305', 'Кабинет 305'),
+       ('common-area-1', 'Общая зона')
+   ] %}
+  <div class="qr-item"><img src="{{ url_for('qr_image', qr_key=key) }}?v={{ qr_version }}"
+           alt="QR {{ label }}"><b>{{ label }}</b><a href="{{ url_for('qr_image', qr_key=key) }}?v={{ qr_version }}" download>
+               Скачать QR-код</a></div>
+  {% endfor %}
+</div></section>
+{% endblock %}

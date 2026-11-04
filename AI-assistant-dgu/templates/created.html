@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Заявка зарегистрирована{% endblock %}
+{% block content %}
+<section class="success-card">
+  <div class="success-icon">✓</div>
+  <span class="eyebrow">ОБРАЩЕНИЕ СОХРАНЕНО</span>
+  <h1>Заявка зарегистрирована</h1>
+  <p>Сохраните номер и персональную ссылку. По ней можно проверить статус обращения.</p>
+  <div class="number-box"><small>НОМЕР ЗАЯВКИ</small><strong>{{ public_number }}</strong></div>
+  <a class="button primary full" href="{{ url_for('track', token=token) }}">Открыть отслеживание</a>
+  <p class="hint">Не передавайте персональную ссылку посторонним: она даёт доступ к информации по этой заявке.</p>
+  <a href="{{ url_for('index') }}" class="text-link">Вернуться на главную</a>
+</section>
+{% endblock %}

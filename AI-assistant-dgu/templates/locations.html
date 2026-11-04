@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Помещения и QR-коды — ДГУ Колледж{% endblock %}
+{% block section_name %}Помещения и QR-коды{% endblock %}
+{% block content %}
+<section class="admin-page-heading">
+  <div>
+    <div class="eyebrow">СПРАВОЧНИК ЛОКАЦИЙ</div>
+    <h1>Помещения и QR-коды</h1>
+    <p>Добавляйте кабинеты и зоны колледжа. Для каждой записи система создаёт постоянную QR-ссылку.</p>
+  </div>
+  <a class="admin-primary-button" href="{{ url_for('admin') }}">← На главную</a>
+</section>
+
+<section class="admin-panel location-create-panel">
+  <div class="admin-panel-heading"><div><h2>Добавить помещение</h2><p>Заполните корпус и хотя бы одно из полей: кабинет или название зоны.</p></div></div>
+  <form class="location-form" method="post" action="{{ url_for('admin_locations') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Корпус<input name="building" maxlength="120" required placeholder="Например, Главный корпус"></label>
+    <label>Этаж<input name="floor" maxlength="30" placeholder="Например, 2"></label>
+    <label>Кабинет<input name="room" maxlength="50" placeholder="Например, 214"></label>
+    <label class="location-wide">Название зоны<input name="zone_name" maxlength="160" placeholder="Например, Лаборатория робототехники или Холл 1 этажа"></label>
+    <button class="admin-primary-button" type="submit">Добавить помещение и создать QR</button>
+  </form>
+</section>
+
+<section class="admin-panel location-list-panel">
+  <div class="admin-panel-heading"><div><h2>Список помещений</h2><p>Всего: {{ locations|length }}</p></div></div>
+  {% if locations %}
+  <div class="location-list">
+    {% for location in locations %}
+    <article class="location-card">
+      <div class="location-qr-preview">
+        <img src="{{ url_for('qr_image', qr_key=location.qr_key) }}?v={{ qr_version }}" alt="QR-код помещения {{ location.zone_name }}">
+        <a href="{{ url_for('qr_image', qr_key=location.qr_key) }}" download="qr-{{ location.qr_key }}.png">Скачать QR</a>
+      </div>
+      <div class="location-card-content">
+        <div class="location-card-heading">
+          <div><span class="knowledge-id">ЛОКАЦИЯ #{{ location.id }}</span><h3>{{ location.zone_name or ('Кабинет ' ~ location.room) }}</h3><p>{{ location.building }}{% if location.floor %} · {{ location.floor }} этаж{% endif %}{% if location.room %} · кабинет {{ location.room }}{% endif %}</p></div>
+          <span class="location-ticket-count">Обращений: {{ location.tickets_count }}</span>
+        </div>
+        <form class="location-edit-form" method="post" action="{{ url_for('edit_location', location_id=location.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label>Корпус<input name="building" maxlength="120" value="{{ location.building }}" required></label>
+          <label>Этаж<input name="floor" maxlength="30" value="{{ location.floor }}"></label>
+          <label>Кабинет<input name="room" maxlength="50" value="{{ location.room }}"></label>
+          <label>Название зоны<input name="zone_name" maxlength="160" value="{{ location.zone_name }}"></label>
+          <div class="location-actions"><button class="admin-secondary-button" type="submit">Сохранить изменения</button></div>
+        </form>
+        <div class="location-card-footer">
+          <small>QR-ключ: {{ location.qr_key }}</small>
+          {% if location.tickets_count == 0 %}
+          <form method="post" action="{{ url_for('delete_location', location_id=location.id) }}" onsubmit="return confirm('Удалить это помещение? QR-код перестанет работать.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="knowledge-delete" type="submit">Удалить помещение</button>
+          </form>
+          {% else %}<span class="location-protected">Удаление запрещено: есть связанные обращения</span>{% endif %}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="admin-empty"><span>▦</span><b>Помещений пока нет</b><p>Добавьте первую локацию в форме выше.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

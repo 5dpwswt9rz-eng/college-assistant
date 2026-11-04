@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Новое обращение — УПК{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <span class="eyebrow">ЕДИНАЯ СИСТЕМА ОБРАЩЕНИЙ</span>
+    <h1>Чем можем помочь?</h1>
+    <p>Задайте вопрос цифровому помощнику или сообщите о неисправности в колледже.</p>
+  </div>
+  <div class="hero-icon">✳</div>
+</section>
+{% if location %}
+<div class="location-banner">📍 Место определено по QR-коду: <b>{{ location.building }}, {{ location.zone_name }}</b></div>
+{% endif %}
+<div class="two-col">
+  <section class="panel">
+    <div class="panel-heading"><span class="step">01</span><div><h2>ИИ-помощник</h2><p>Ответит на типовой вопрос или поможет оформить заявку</p></div></div>
+    <div class="chat-window" id="chatWindow">
+      <div class="bot-message">Здравствуйте! Опишите вопрос или проблему. Если требуется вмешательство сотрудника, я предложу создать заявку.</div>
+    </div>
+    <div class="chat-compose">
+      <textarea id="chatInput" rows="2" placeholder="Например: в кабинете 214 не работает проектор..."></textarea>
+      <button type="submit" id="submitButton" class="button primary">
+   Отправить обращение
+</button>
+    </div>
+    <div id="aiResult" class="ai-result hidden"></div>
+    <p class="hint">ИИ не заменяет специалиста и не определяет сроки ремонта.</p>
+  </section>
+  <section class="panel">
+    <div class="panel-heading"><span class="step">02</span><div><h2>Создать заявку</h2><p>Сообщение поступит сотруднику УПК</p></div></div>
+    <form method="post" action="{{ url_for('ticket_new') }}" enctype="multipart/form-data" class="form">
+      <input
+        type="hidden"
+        name="submission_key"
+        value="{{ submission_key }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="location_id" id="locationId" value="{{ location.id if location else '' }}">
+      <label>
+        Имя <span class="required">*</span>
+      <input
+        type="text"
+        name="applicant_name"
+        maxlength="80"
+        required
+        placeholder="Введите ваше имя">
+      </label>
+      <label>
+         Фамилия <span class="required">*</span>
+      <input
+        type="text"
+        name="applicant_surname"
+        maxlength="80"
+        required
+        placeholder="Введите вашу фамилию">
+      </label>
+      <label>Заголовок<input type="text" name="title" id="ticketTitle" maxlength="100" placeholder="Например: Не работает проектор"></label>
+      <label>Описание проблемы <span class="required">*</span><textarea name="description" id="ticketDescription" rows="5" required placeholder="Что произошло? Укажите подробности..."></textarea></label>
+      <label>Категория
+        <select name="category" id="ticketCategory">
+          {% for category in categories %}<option>{{ category }}</option>{% endfor %}
+        </select>
+      </label>
+      {% if not location %}
+      <label>Место
+        <select name="location_id_manual" id="manualLocation">
+          <option value="">Выберите помещение (необязательно)</option>
+          {% for item in locations %}
+          <option value="{{ item.id }}">
+            {{ item.building }}{% if item.floor %}, этаж {{ item.floor }}{% endif %}
+            {% if item.room %}, кабинет {{ item.room }}{% endif %}
+            {% if item.zone_name %} — {{ item.zone_name }}{% endif %}
+          </option>
+          {% endfor %}
+        </select>
+        <span class="hint">Если вы знаете помещение, выберите его из списка.</span>
+      </label>
+      {% endif %}
+      <label>Фотография (необязательно)<input type="file" name="photo" accept=".png,.jpg,.jpeg,.webp"></label>
+      <button class="button primary full" type="submit">Зарегистрировать обращение</button>
+    </form>
+  </section>
+</div>
+<meta name="csrf_token" content="{{ csrf_token }}">
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

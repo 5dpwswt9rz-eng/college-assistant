@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ ticket.public_number }} — ДГУ Колледж{% endblock %}
+{% block section_name %}Карточка обращения{% endblock %}
+{% block content %}
+<section class="admin-page-heading"><div><div class="eyebrow">КАРТОЧКА ОБРАЩЕНИЯ</div><h1>{{ ticket.public_number }}</h1><p>{{ ticket.title }}</p></div><a class="admin-reset" href="{{ url_for('admin_tickets') }}">← К списку обращений</a></section>
+<div class="admin-detail-grid">
+<section class="admin-panel"><span class="status-label">{{ ticket.status }}</span><h2>{{ ticket.title }}</h2><p>{{ ticket.description }}</p>
+<div class="meta-grid admin-meta-grid"><div><small>Заявитель</small><b>{{ ((ticket.applicant_name or '') ~ ' ' ~ (ticket.applicant_surname or ''))|trim or 'Не указан в заявке' }}</b></div><div><small>Категория</small><b>{{ ticket.category }}</b></div><div><small>Место</small><b>{{ ticket.zone_name or "Не указано" }}</b></div><div><small>Создана</small><b>{{ ticket.created_at }}</b></div><div><small>Обновлена</small><b>{{ ticket.updated_at }}</b></div></div>
+{% if ticket.image_name %}<p><a href="{{ url_for('uploaded_file', filename=ticket.image_name) }}">Открыть фото</a></p>{% endif %}
+</section>
+<section class="admin-panel"><h2>Обработка заявки</h2>
+<form method="post" class="form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<label>Статус<select name="status">{% for s in statuses %}<option {% if ticket.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+<label>Исполнитель<input name="assignee" value="{{ ticket.assignee }}" placeholder="ФИО или подразделение"></label>
+<label>Комментарий / результат<textarea name="comment" rows="4" placeholder="Что сделано или какая информация нужна?"></textarea></label>
+<label>Видимость комментария<select name="visibility"><option value="public">Виден заявителю</option><option value="internal">Внутренняя заметка</option></select></label>
+<button class="button primary full">Сохранить изменения</button></form>
+</section></div>
+<div class="admin-detail-grid lower"><section class="admin-panel"><h2>История действий</h2>{% for h in history %}<div class="timeline-item"><b>{{ h.old_status or "Создана" }} → {{ h.new_status }}</b><small>{{ h.actor }} · {{ h.created_at }}</small>{% if h.note %}<p>{{ h.note }}</p>{% endif %}</div>{% endfor %}</section>
+<section class="admin-panel"><h2>Комментарии</h2>{% for c in comments %}<div class="comment"><p>{{ c.body }}</p><small>{{ c.author }} · {{ c.created_at }} · {{ "Публичный" if c.visibility=="public" else "Внутренний" }}</small></div>{% else %}<p class="muted">Комментариев пока нет.</p>{% endfor %}</section></div>
+{% endblock %}

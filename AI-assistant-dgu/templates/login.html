@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Вход сотрудника{% endblock %}
+{% block content %}
+<section class="login-card panel">
+  <span class="eyebrow">РАБОЧЕЕ ПРОСТРАНСТВО</span><h1>Вход сотрудника</h1>
+  <p class="muted">Доступ к панели обработки обращений УПК.</p>
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Логин<input name="login" required autocomplete="username"></label>
+    <label>Пароль<input type="password" name="password" required autocomplete="current-password"></label>
+    <button class="button primary full">Войти</button>
+  </form>
+</section>
+{% endblock %}
