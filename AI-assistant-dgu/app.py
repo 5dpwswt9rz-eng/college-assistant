@@ -23,7 +23,7 @@ load_dotenv()
 
 QR_BASE_URL = os.getenv(
    "QR_BASE_URL",
-   "https://college-assistant-17ga.onrender.com/admin/locations"
+   "https://college-assistant-17ga.onrender.com"
 ).rstrip("/")
 
 BASE_DIR = Path(__file__).resolve().parent
