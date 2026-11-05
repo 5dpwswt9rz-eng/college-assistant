@@ -50,10 +50,20 @@ app.config.update(
     SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "0").strip().lower() in {"1", "true", "yes", "on"},
 )
 
-AI_API_KEY = os.getenv("AI_API_KEY", "")
-AI_BASE_URL = os.getenv("AI_BASE_URL", "https://api.groq.com/openai/v1")
-AI_MODEL = os.getenv("AI_MODEL", "llama-3.3-70b-versatile")
+AI_API_KEY = (
+    os.getenv("AI_API_KEY")
+    or os.getenv("GROQ_API_KEY", "")
+)
 
+AI_BASE_URL = os.getenv(
+    "AI_BASE_URL",
+    "https://api.groq.com/openai/v1"
+)
+
+AI_MODEL = os.getenv(
+    "AI_MODEL",
+    "openai/gpt-oss-120b"
+)
 
 STATUSES = [
     "Новая", "На рассмотрении", "Назначен исполнитель",
