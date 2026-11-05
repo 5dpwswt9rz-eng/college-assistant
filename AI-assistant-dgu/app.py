@@ -315,8 +315,7 @@ def ask_ai(question, knowledge):
         app.logger.error("Groq API: не задан ключ AI_API_KEY или GROQ_API_KEY")
         return None
 
-    if not knowledge:
-        return None
+ 
 
     url = AI_BASE_URL.rstrip("/") + "/chat/completions"
 
